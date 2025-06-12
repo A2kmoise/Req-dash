@@ -13,8 +13,8 @@ class StudentController extends Controller
     public function index()
     {
         $students = Student::latest()->paginate(5);
-
-        return view ('students.index', compact('students'))->with('i', (request()->imput('page', 1) - 1) * 5);
+        return view('students.index', compact('students'))
+            ->with('i', (request()->input('page', 1) - 1) * 5);
     }
 
     /**
@@ -22,7 +22,7 @@ class StudentController extends Controller
      */
     public function create()
     {
-     return view('students.create');
+        return view('students.create');
     }
 
     /**
@@ -31,13 +31,15 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'studentname' => 'required',
-            'course' => 'required',
-            'fee' => 'required',
+            'studentname' => 'required|string|max:255',
+            'course' => 'required|string|max:255',
+            'fee' => 'required|numeric',
         ]);
-        student::create($request->all());
 
-        return redirect()->route('students.index')->with('success', 'students created already');
+        Student::create($request->only('studentname', 'course', 'fee'));
+
+        return redirect()->route('students.index')
+            ->with('success', 'Student created successfully.');
     }
 
     /**
@@ -45,7 +47,7 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        return view('students.show', compact('students'));
+        return view('students.show', compact('student'));
     }
 
     /**
@@ -53,7 +55,7 @@ class StudentController extends Controller
      */
     public function edit(Student $student)
     {
-        return view ('students.edit', compact('students'));
+        return view('students.edit', compact('student'));
     }
 
     /**
@@ -61,7 +63,16 @@ class StudentController extends Controller
      */
     public function update(Request $request, Student $student)
     {
-        //
+        $request->validate([
+            'studentname' => 'required|string|max:255',
+            'course' => 'required|string|max:255',
+            'fee' => 'required|numeric',
+        ]);
+
+        $student->update($request->only('studentname', 'course', 'fee'));
+
+        return redirect()->route('students.index')
+            ->with('success', 'Student updated successfully.');
     }
 
     /**
@@ -69,6 +80,9 @@ class StudentController extends Controller
      */
     public function destroy(Student $student)
     {
-        //
+        $student->delete();
+
+        return redirect()->route('students.index')
+            ->with('success', 'Student deleted successfully.');
     }
 }
